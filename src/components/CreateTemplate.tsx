@@ -444,7 +444,7 @@ const CreateTemplate = () => {
                             />
                           </FormControl>
                           <FormDescription>
-                            Use {"{{"} 1 {"}}"}}, {"{{"} 2 {"}}"}} para parâmetros que serão preenchidos depois
+                            Use &#123;&#123;1&#125;&#125;, &#123;&#123;2&#125;&#125; para parâmetros que serão preenchidos depois
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
