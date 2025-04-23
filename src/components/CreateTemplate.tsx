@@ -391,6 +391,7 @@ const CreateTemplate = () => {
                               <Button 
                                 variant="outline" 
                                 onClick={() => uploadHeader(watchHeaderType)}
+                                type="button"
                               >
                                 Selecionar arquivo
                               </Button>
