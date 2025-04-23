@@ -42,6 +42,17 @@ import { Check, Info, Loader2, Plus, Trash2, UploadCloud } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
+// Definição dos tipos para os componentes do template
+type TemplateComponent = {
+  type: "HEADER" | "BODY" | "FOOTER" | "BUTTONS";
+  format?: string;
+  text?: string;
+  buttons?: Array<{
+    type: string;
+    text: string;
+  }>;
+};
+
 const formSchema = z.object({
   name: z.string().min(1, "Nome obrigatório")
     .regex(/^[a-z0-9_]+$/, "Apenas letras minúsculas, números e underscore"),
@@ -125,7 +136,7 @@ const CreateTemplate = () => {
     setPreviewParams(exampleParams);
     
     // Create template object for preview
-    const components = [];
+    const components: TemplateComponent[] = [];
     
     if (values.headerType && values.headerType !== "NONE") {
       components.push({
@@ -433,7 +444,7 @@ const CreateTemplate = () => {
                             />
                           </FormControl>
                           <FormDescription>
-                            Use {{1}}, {{2}} para parâmetros que serão preenchidos depois
+                            Use {"{{"} 1 {"}}"}}, {"{{"} 2 {"}}"}} para parâmetros que serão preenchidos depois
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
