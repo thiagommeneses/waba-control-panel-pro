@@ -485,11 +485,11 @@ const CreateTemplate = () => {
                         <div className="flex items-center justify-between">
                           <Label>Botões</Label>
                           <Button
+                            type="button"
                             variant="outline"
                             size="sm"
                             onClick={addButton}
                             disabled={watchButtons?.length >= 3}
-                            type="button"
                           >
                             <Plus className="mr-1 h-4 w-4" /> Adicionar
                           </Button>
@@ -501,10 +501,10 @@ const CreateTemplate = () => {
                               <h4 className="text-sm font-medium">Botão {index + 1}</h4>
                               {index > 0 && (
                                 <Button
+                                  type="button"
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => removeButton(index)}
-                                  type="button"
                                 >
                                   <Trash2 className="h-4 w-4 text-red-500" />
                                 </Button>
