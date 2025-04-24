@@ -17,6 +17,7 @@ import { TemplateSelector } from "./templates/TemplateSelector";
 import { TemplateParamsForm } from "./templates/TemplateParamsForm";
 import { useTemplateForm } from "@/hooks/templates/useTemplateForm";
 import { Template } from "@/types/template";
+import { supabase } from "@/integrations/supabase/client";
 
 const SendTemplate = () => {
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
@@ -36,14 +37,18 @@ const SendTemplate = () => {
     setError(null);
     
     try {
-      const settingsJson = localStorage.getItem('wabaSettings');
+      // Get API settings from Supabase
+      const { data: settings, error: settingsError } = await supabase
+        .from('api_settings')
+        .select('*')
+        .limit(1)
+        .single();
       
-      if (!settingsJson) {
-        throw new Error("Configurações não encontradas. Por favor, configure as credenciais da API primeiro.");
+      if (settingsError) {
+        throw new Error("Configurações da API não encontradas. Por favor, configure as credenciais da API primeiro.");
       }
       
-      const settings = JSON.parse(settingsJson);
-      const { wabaId, accessToken } = settings;
+      const { waba_id: wabaId, access_token: accessToken } = settings;
       
       if (!wabaId || !accessToken) {
         throw new Error("WABA ID ou Access Token não configurados.");
