@@ -52,6 +52,9 @@ const Settings = () => {
       // Simular uma chamada de API
       await new Promise(resolve => setTimeout(resolve, 1500));
       
+      // Salvando no localStorage para que outras partes da aplicação possam usar
+      localStorage.setItem('wabaSettings', JSON.stringify(settings));
+      
       toast({
         title: "Configurações salvas",
         description: "As credenciais foram atualizadas com sucesso.",
@@ -85,8 +88,16 @@ const Settings = () => {
     setIsLoading(true);
     
     try {
-      // Simular uma chamada de API
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Fazer uma chamada real para a API do WhatsApp
+      const phoneNumberId = settings.phoneNumberId;
+      const accessToken = settings.accessToken;
+      
+      const response = await fetch(`https://graph.facebook.com/v22.0/${phoneNumberId}?access_token=${accessToken}`);
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
       
       toast({
         title: "Conexão bem-sucedida",
@@ -96,12 +107,24 @@ const Settings = () => {
       toast({
         variant: "destructive",
         title: "Falha na conexão",
-        description: "Não foi possível conectar à API do WhatsApp. Verifique suas credenciais.",
+        description: error instanceof Error ? error.message : "Não foi possível conectar à API do WhatsApp. Verifique suas credenciais.",
       });
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Load saved settings from localStorage on component mount
+  React.useEffect(() => {
+    const savedSettings = localStorage.getItem('wabaSettings');
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (e) {
+        console.error("Erro ao carregar configurações salvas:", e);
+      }
+    }
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -294,7 +317,7 @@ const Settings = () => {
                     <div className="flex">
                       <Input
                         id="apiVersion"
-                        defaultValue="v18.0"
+                        defaultValue="v22.0"
                         className="rounded-r-none"
                       />
                       <Button
