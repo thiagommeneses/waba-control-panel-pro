@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Card, 
   CardContent, 
@@ -33,7 +32,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,6 +40,7 @@ import { MessagePreview } from "./MessagePreview";
 import { Check, Info, Loader2, Plus, Trash2, UploadCloud } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useTemplateSubmission } from "@/hooks/useTemplateSubmission";
 
 // Definição dos tipos para os componentes do template
 type TemplateComponent = {
@@ -75,7 +75,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const CreateTemplate = () => {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { submissionStatus, submitTemplate, checkTemplateStatus } = useTemplateSubmission();
   const [previewTemplate, setPreviewTemplate] = useState<any>(null);
   const [previewParams, setPreviewParams] = useState<string[]>([]);
   
@@ -128,28 +128,35 @@ const CreateTemplate = () => {
   const updatePreview = () => {
     const values = form.getValues();
     
-    // Extract parameters from body text
+    // Extract parameters from body text with improved regex
     const paramMatches = Array.from((values.bodyText || "").matchAll(/\{\{(\d+)\}\}/g));
-    const paramsCount = paramMatches.length;
-    const exampleParams = Array(paramsCount).fill("Exemplo");
+    const uniqueParams = Array.from(new Set(paramMatches.map(match => match[1])))
+      .sort((a, b) => Number(a) - Number(b));
+    const exampleParams = uniqueParams.map(param => `Exemplo ${param}`);
     
     setPreviewParams(exampleParams);
     
-    // Create template object for preview
-    const components: TemplateComponent[] = [];
+    // Create template object for preview with real structure
+    const components = [];
     
     if (values.headerType && values.headerType !== "NONE") {
       components.push({
         type: "HEADER",
         format: values.headerType,
-        text: values.headerText || ""
+        text: values.headerText || "",
+        example: values.headerType === "TEXT" ? {
+          header_text: [values.headerText || ""]
+        } : undefined
       });
     }
     
     if (values.bodyText) {
       components.push({
         type: "BODY",
-        text: values.bodyText
+        text: values.bodyText,
+        example: {
+          body_text: [exampleParams]
+        }
       });
     }
     
@@ -179,34 +186,47 @@ const CreateTemplate = () => {
     });
   };
 
-  // Update preview whenever form values change
-  React.useEffect(() => {
-    updatePreview();
-  }, [watchBodyText, watchHeaderType, watchHasButtons, watchButtons, form]);
+  // Atualização em tempo real do preview
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      updatePreview();
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Monitoramento do status do template
+  useEffect(() => {
+    if (submissionStatus === 'monitoring') {
+      const interval = setInterval(async () => {
+        const status = await checkTemplateStatus();
+        if (status === 'APPROVED' || status === 'REJECTED') {
+          clearInterval(interval);
+        }
+      }, 30000); // Verifica a cada 30 segundos
+
+      return () => clearInterval(interval);
+    }
+  }, [submissionStatus]);
 
   const onSubmit = async (values: FormValues) => {
-    setIsLoading(true);
-    
-    try {
-      // Simulando envio da requisição
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      console.log("Criando template:", values);
-      
+    const result = await submitTemplate({
+      name: values.name,
+      category: values.category,
+      language: values.language,
+      components: previewTemplate.components
+    });
+
+    if (result.success) {
       toast({
-        title: "Template enviado para aprovação!",
-        description: `Template ${values.name} foi enviado para aprovação.`,
+        title: "Template enviado para aprovação",
+        description: "Acompanharemos o status do seu template e te notificaremos quando houver atualizações.",
       });
-      
-      form.reset();
-    } catch (error) {
+    } else {
       toast({
         variant: "destructive",
         title: "Erro ao criar template",
-        description: "Ocorreu um problema ao enviar seu template. Tente novamente.",
+        description: result.error,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -580,9 +600,9 @@ const CreateTemplate = () => {
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isLoading}
+                    disabled={submissionStatus === 'submitting'}
                   >
-                    {isLoading ? (
+                    {submissionStatus === 'submitting' ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Enviando...
@@ -602,10 +622,13 @@ const CreateTemplate = () => {
             <div className="flex items-start">
               <Info className="h-5 w-5 text-amber-500 mr-2 mt-0.5" />
               <div>
-                <h4 className="font-medium text-amber-800">Observações sobre aprovação</h4>
+                <h4 className="font-medium text-amber-800">Status do Template</h4>
                 <p className="text-sm text-amber-700 mt-1">
-                  O processo de aprovação do template pode levar até 48 horas. 
-                  Templates que violam as diretrizes do WhatsApp podem ser rejeitados.
+                  {submissionStatus === 'idle' && "Preencha o formulário para criar um novo template"}
+                  {submissionStatus === 'submitting' && "Enviando template..."}
+                  {submissionStatus === 'monitoring' && "Template enviado, aguardando aprovação..."}
+                  {submissionStatus === 'completed' && "Template aprovado!"}
+                  {submissionStatus === 'error' && "Ocorreu um erro com o template"}
                 </p>
               </div>
             </div>
