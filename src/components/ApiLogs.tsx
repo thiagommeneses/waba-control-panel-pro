@@ -61,7 +61,7 @@ const ApiLogs = () => {
                 </TableCell>
                 <TableCell>
                   {log.response_status ? (
-                    <Badge variant={log.response_status < 400 ? "success" : "destructive"}>
+                    <Badge variant={log.response_status < 400 ? "secondary" : "destructive"}>
                       {log.response_status}
                     </Badge>
                   ) : (
