@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { Template } from "@/types/template";
+import { FormValues, Template } from "@/types/template";
 
 const formSchema = z.object({
   phoneNumber: z.string().min(10, "Número de telefone inválido").max(15),
@@ -12,8 +12,6 @@ const formSchema = z.object({
   language: z.string().min(1, "Selecione um idioma"),
   params: z.array(z.string().optional()).optional(),
 });
-
-export type FormValues = z.infer<typeof formSchema>;
 
 export const useTemplateForm = (templates: Template[]) => {
   const { toast } = useToast();
