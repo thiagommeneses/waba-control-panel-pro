@@ -90,7 +90,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         </div>
         <div className="flex items-center">
           <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
-          <span className="text-sm">Conectado</span>
+          <span className="text-sm">Ativo</span>
         </div>
       </div>
       
