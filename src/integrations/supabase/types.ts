@@ -9,7 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      api_logs: {
+        Row: {
+          created_at: string
+          endpoint: string
+          error_message: string | null
+          id: string
+          request_body: Json | null
+          request_method: string
+          response_body: Json | null
+          response_status: number | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          request_body?: Json | null
+          request_method: string
+          response_body?: Json | null
+          response_status?: number | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          request_body?: Json | null
+          request_method?: string
+          response_body?: Json | null
+          response_status?: number | null
+        }
+        Relationships: []
+      }
+      api_settings: {
+        Row: {
+          access_token: string
+          api_version: string | null
+          business_id: string
+          created_at: string
+          id: string
+          phone_number_id: string
+          request_timeout: number | null
+          updated_at: string
+          waba_id: string
+          webhook_secret: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          access_token: string
+          api_version?: string | null
+          business_id: string
+          created_at?: string
+          id?: string
+          phone_number_id: string
+          request_timeout?: number | null
+          updated_at?: string
+          waba_id: string
+          webhook_secret?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          access_token?: string
+          api_version?: string | null
+          business_id?: string
+          created_at?: string
+          id?: string
+          phone_number_id?: string
+          request_timeout?: number | null
+          updated_at?: string
+          waba_id?: string
+          webhook_secret?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -8,7 +8,8 @@ import {
   ChevronRight,
   Phone,
   ClipboardCheck,
-  Users
+  Users,
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,11 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       id: "history",
       label: "Templates Enviados",
       icon: <Clock size={20} />,
+    },
+    {
+      id: "logs",
+      label: "Logs da API",
+      icon: <Activity size={20} />,
     },
     {
       id: "settings",

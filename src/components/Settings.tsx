@@ -36,23 +36,71 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isTokenVisible, setIsTokenVisible] = useState(false);
   
-  // Dados de exemplo para as configurações
   const [settings, setSettings] = useState({
-    wabaId: "107474295599999",
-    businessId: "245630802390000",
-    phoneNumberId: "115434188590000",
-    accessToken: "EAAQZABf8VZCaoBACF5VVyVxjuE7NzImpwmMrVv9IFSJSZAoXIutm0TbS6DSq..."
+    wabaId: "",
+    businessId: "",
+    phoneNumberId: "",
+    accessToken: "",
+    apiVersion: "v22.0",
+    requestTimeout: 30000,
+    webhookUrl: "",
+    webhookSecret: ""
   });
+
+  useEffect(() => {
+    // Carregar configurações do banco de dados
+    const loadSettings = async () => {
+      const { data, error } = await supabase
+        .from('api_settings')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error('Erro ao carregar configurações:', error);
+        return;
+      }
+
+      if (data) {
+        setSettings({
+          wabaId: data.waba_id,
+          businessId: data.business_id,
+          phoneNumberId: data.phone_number_id,
+          accessToken: data.access_token,
+          apiVersion: data.api_version,
+          requestTimeout: data.request_timeout,
+          webhookUrl: data.webhook_url || "",
+          webhookSecret: data.webhook_secret || ""
+        });
+      }
+    };
+
+    loadSettings();
+  }, []);
 
   const handleSaveSettings = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
     
     try {
-      // Simular uma chamada de API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { data, error } = await supabase
+        .from('api_settings')
+        .upsert({
+          waba_id: settings.wabaId,
+          business_id: settings.businessId,
+          phone_number_id: settings.phoneNumberId,
+          access_token: settings.accessToken,
+          api_version: settings.apiVersion,
+          request_timeout: settings.requestTimeout,
+          webhook_url: settings.webhookUrl,
+          webhook_secret: settings.webhookSecret
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       
-      // Salvando no localStorage para que outras partes da aplicação possam usar
+      // Também salvar no localStorage para compatibilidade com o código existente
       localStorage.setItem('wabaSettings', JSON.stringify(settings));
       
       toast({
@@ -60,6 +108,7 @@ const Settings = () => {
         description: "As credenciais foram atualizadas com sucesso.",
       });
     } catch (error) {
+      console.error('Erro ao salvar:', error);
       toast({
         variant: "destructive",
         title: "Erro ao salvar",
