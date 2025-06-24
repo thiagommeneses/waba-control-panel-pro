@@ -24,6 +24,8 @@ import {
   Filter, 
   MoreHorizontal, 
   Search,
+  RefreshCw,
+  AlertCircle
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -36,70 +38,46 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-// Dados de exemplo para mensagens enviadas
-const sentMessages = [
-  {
-    id: "msg1",
-    templateName: "boas_vindas",
-    phoneNumber: "5511999998888",
-    status: "DELIVERED",
-    timestamp: new Date(2025, 3, 20, 14, 30),
-    params: ["João Silva"]
-  },
-  {
-    id: "msg2",
-    templateName: "confirmacao_agendamento",
-    phoneNumber: "5511999997777",
-    status: "DELIVERED",
-    timestamp: new Date(2025, 3, 20, 13, 45),
-    params: ["Maria Oliveira", "22/04/2025", "14:00"]
-  },
-  {
-    id: "msg3",
-    templateName: "boas_vindas",
-    phoneNumber: "5511999996666",
-    status: "FAILED",
-    timestamp: new Date(2025, 3, 20, 12, 15),
-    params: ["Pedro Santos"]
-  },
-  {
-    id: "msg4",
-    templateName: "confirmacao_agendamento",
-    phoneNumber: "5511999995555",
-    status: "SENT",
-    timestamp: new Date(2025, 3, 20, 11, 30),
-    params: ["Ana Costa", "21/04/2025", "10:30"]
-  },
-  {
-    id: "msg5",
-    templateName: "boas_vindas",
-    phoneNumber: "5511999994444",
-    status: "DELIVERED",
-    timestamp: new Date(2025, 3, 19, 16, 20),
-    params: ["Carlos Ferreira"]
-  },
-  {
-    id: "msg6",
-    templateName: "confirmacao_agendamento",
-    phoneNumber: "5511999993333",
-    status: "READ",
-    timestamp: new Date(2025, 3, 19, 15, 10),
-    params: ["Julia Mendes", "20/04/2025", "16:45"]
-  },
-  {
-    id: "msg7",
-    templateName: "boas_vindas",
-    phoneNumber: "5511999992222",
-    status: "DELIVERED",
-    timestamp: new Date(2025, 3, 19, 14, 50),
-    params: ["Roberto Alves"]
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { SentMessage } from "@/types/template";
 
 const SentTemplates = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Buscar mensagens enviadas do Supabase
+  const { data: sentMessages = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['sent-messages'],
+    queryFn: async () => {
+      console.log('Buscando mensagens enviadas...');
+      
+      const { data, error } = await supabase
+        .from('sent_messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar mensagens:', error);
+        throw error;
+      }
+
+      console.log('Mensagens encontradas:', data);
+
+      // Transformar dados do Supabase para o formato esperado
+      return (data || []).map(msg => ({
+        id: msg.id.toString(),
+        templateName: msg.template_name || 'N/A',
+        phoneNumber: msg.phone_number || '',
+        status: msg.status as SentMessage['status'] || 'SENT',
+        timestamp: new Date(msg.created_at),
+        params: msg.parameters ? JSON.parse(msg.parameters) : [],
+        wamid: msg.wamid,
+        errorMessage: msg.error_message
+      })) as SentMessage[];
+    },
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -149,11 +127,33 @@ const SentTemplates = () => {
     });
   };
 
+  const handleRefresh = () => {
+    refetch();
+    toast({
+      description: "Lista atualizada com sucesso.",
+    });
+  };
+
   // Filtragem básica por template ou número de telefone
   const filteredMessages = sentMessages.filter((msg) => 
     msg.templateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     msg.phoneNumber.includes(searchTerm)
   );
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-center space-x-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              <span>Erro ao carregar mensagens enviadas</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -166,14 +166,25 @@ const SentTemplates = () => {
                 Histórico de mensagens enviadas pela API WhatsApp
               </CardDescription>
             </div>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={handleExport}
-            >
-              <DownloadCloud className="h-4 w-4" /> 
-              Exportar CSV
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isLoading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Atualizar
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={handleExport}
+              >
+                <DownloadCloud className="h-4 w-4" /> 
+                Exportar CSV
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -202,7 +213,7 @@ const SentTemplates = () => {
           <div className="rounded-md border overflow-hidden">
             <Table>
               <TableCaption>
-                Total de {filteredMessages.length} mensagens
+                {isLoading ? "Carregando mensagens..." : `Total de ${filteredMessages.length} mensagens`}
               </TableCaption>
               <TableHeader>
                 <TableRow>
@@ -215,53 +226,67 @@ const SentTemplates = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMessages.map((message) => (
-                  <TableRow key={message.id}>
-                    <TableCell className="font-medium">
-                      {message.templateName}
-                    </TableCell>
-                    <TableCell>
-                      {formatPhoneNumber(message.phoneNumber)}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(message.status)}
-                    </TableCell>
-                    <TableCell>
-                      {format(message.timestamp, "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-gray-600 text-sm">
-                        {message.params.join(", ")}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
-                          <DropdownMenuItem>Reenviar</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-6">
+                      <div className="flex items-center justify-center">
+                        <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                        Carregando mensagens...
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))}
-                
-                {filteredMessages.length === 0 && (
+                ) : filteredMessages.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-6 text-gray-500">
-                      Nenhuma mensagem encontrada
+                      {sentMessages.length === 0 ? "Nenhuma mensagem enviada ainda" : "Nenhuma mensagem encontrada"}
                     </TableCell>
                   </TableRow>
+                ) : (
+                  filteredMessages.map((message) => (
+                    <TableRow key={message.id}>
+                      <TableCell className="font-medium">
+                        {message.templateName}
+                      </TableCell>
+                      <TableCell>
+                        {formatPhoneNumber(message.phoneNumber)}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(message.status)}
+                      </TableCell>
+                      <TableCell>
+                        {format(message.timestamp, "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-gray-600 text-sm">
+                          {message.params.length > 0 ? message.params.join(", ") : "Sem parâmetros"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <span className="sr-only">Abrir menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                            <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
+                            {message.wamid && (
+                              <DropdownMenuItem>ID: {message.wamid}</DropdownMenuItem>
+                            )}
+                            {message.errorMessage && (
+                              <DropdownMenuItem className="text-red-600">
+                                Erro: {message.errorMessage}
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>Reenviar</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>

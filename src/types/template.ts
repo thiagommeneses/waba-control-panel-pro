@@ -21,3 +21,14 @@ export interface FormValues {
   templateName: string;
   params?: string[];
 }
+
+export interface SentMessage {
+  id: string;
+  templateName: string;
+  phoneNumber: string;
+  status: 'DELIVERED' | 'READ' | 'SENT' | 'FAILED';
+  timestamp: Date;
+  params: string[];
+  wamid?: string;
+  errorMessage?: string;
+}
