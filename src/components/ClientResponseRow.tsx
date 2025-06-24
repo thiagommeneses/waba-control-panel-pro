@@ -72,7 +72,7 @@ const ClientResponseRow = ({ response }: ClientResponseRowProps) => {
                 <p className="text-sm text-purple-600">
                   <span className="font-medium">Payload:</span> {response.buttonPayload}
                 </p>
-              )}
+                )}
             </div>
           )}
           {response.wamid && (
