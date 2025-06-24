@@ -1,6 +1,16 @@
 
 import React, { useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import SendTemplate from "@/components/SendTemplate";
 import CreateTemplate from "@/components/CreateTemplate";
 import TemplatesList from "@/components/TemplatesList";
@@ -11,6 +21,27 @@ import ApiLogs from "@/components/ApiLogs";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("send");
+
+  const getPageTitle = () => {
+    switch (activeTab) {
+      case "send":
+        return "Enviar Template";
+      case "create":
+        return "Criar Template";
+      case "templates":
+        return "Lista de Templates";
+      case "history":
+        return "Templates Enviados";
+      case "responses":
+        return "Respostas dos Clientes";
+      case "settings":
+        return "Configurações";
+      case "logs":
+        return "Logs da API";
+      default:
+        return "Dashboard";
+    }
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -34,15 +65,35 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="flex-1 overflow-auto p-4 md:p-6">
-        <div className="container mx-auto">
-          <h1 className="text-2xl md:text-3xl font-bold mb-6">WABA Control Panel Pro</h1>
-          {renderContent()}
-        </div>
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="/">
+                    WABA Control Panel Pro
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{getPageTitle()}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </header>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min p-6">
+              {renderContent()}
+            </div>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 
