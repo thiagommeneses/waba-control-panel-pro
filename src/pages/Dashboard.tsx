@@ -5,6 +5,7 @@ import SendTemplate from "@/components/SendTemplate";
 import CreateTemplate from "@/components/CreateTemplate";
 import TemplatesList from "@/components/TemplatesList";
 import SentTemplates from "@/components/SentTemplates";
+import ClientResponses from "@/components/ClientResponses";
 import Settings from "@/components/Settings";
 import ApiLogs from "@/components/ApiLogs";
 
@@ -21,6 +22,8 @@ const Dashboard = () => {
         return <TemplatesList />;
       case "history":
         return <SentTemplates />;
+      case "responses":
+        return <ClientResponses />;
       case "settings":
         return <Settings />;
       case "logs":

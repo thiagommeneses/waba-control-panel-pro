@@ -84,6 +84,57 @@ export type Database = {
         }
         Relationships: []
       }
+      client_responses: {
+        Row: {
+          button_payload: string | null
+          client_name: string | null
+          content: string | null
+          context_wamid: string | null
+          created_at: string
+          id: string
+          image_caption: string | null
+          image_url: string | null
+          message_type: string
+          metadata: Json | null
+          phone_number: string
+          timestamp_received: string
+          updated_at: string
+          wamid: string | null
+        }
+        Insert: {
+          button_payload?: string | null
+          client_name?: string | null
+          content?: string | null
+          context_wamid?: string | null
+          created_at?: string
+          id?: string
+          image_caption?: string | null
+          image_url?: string | null
+          message_type: string
+          metadata?: Json | null
+          phone_number: string
+          timestamp_received?: string
+          updated_at?: string
+          wamid?: string | null
+        }
+        Update: {
+          button_payload?: string | null
+          client_name?: string | null
+          content?: string | null
+          context_wamid?: string | null
+          created_at?: string
+          id?: string
+          image_caption?: string | null
+          image_url?: string | null
+          message_type?: string
+          metadata?: Json | null
+          phone_number?: string
+          timestamp_received?: string
+          updated_at?: string
+          wamid?: string | null
+        }
+        Relationships: []
+      }
       sent_messages: {
         Row: {
           created_at: string

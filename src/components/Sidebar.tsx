@@ -10,7 +10,8 @@ import {
   ClipboardCheck,
   Users,
   Activity,
-  List
+  List,
+  MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +41,11 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       id: "history",
       label: "Templates Enviados",
       icon: <Clock size={20} />,
+    },
+    {
+      id: "responses",
+      label: "Respostas dos Clientes",
+      icon: <MessageCircle size={20} />,
     },
     {
       id: "logs",
