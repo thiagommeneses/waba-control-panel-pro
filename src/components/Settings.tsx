@@ -41,7 +41,7 @@ const Settings = () => {
     businessId: "",
     phoneNumberId: "",
     accessToken: "",
-    apiVersion: "v22.0",
+    apiVersion: "v23.0",
     requestTimeout: 30000,
     webhookUrl: "",
     webhookSecret: ""
