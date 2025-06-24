@@ -81,6 +81,10 @@ const ClientResponses = () => {
     }
   };
 
+  const handleUpdate = () => {
+    refetch();
+  };
+
   const paginatedResponses = responses.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -157,7 +161,7 @@ const ClientResponses = () => {
             </div>
           ) : (
             <>
-              <ClientResponsesTable responses={paginatedResponses} />
+              <ClientResponsesTable responses={paginatedResponses} onUpdate={handleUpdate} />
               <ClientResponsesPagination
                 currentPage={currentPage}
                 totalPages={totalPages}

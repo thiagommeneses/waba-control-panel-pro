@@ -11,13 +11,29 @@ import ImageViewer from "./ImageViewer";
 
 interface ClientResponseRowProps {
   response: ClientResponse;
+  onUpdate?: () => void;
 }
 
-const ClientResponseRow = ({ response }: ClientResponseRowProps) => {
+const ClientResponseRow = ({ response, onUpdate }: ClientResponseRowProps) => {
+  const isFlagged = response.metadata?.flagged === true;
+  const isArchived = response.metadata?.archived === true;
+
   return (
-    <TableRow>
+    <TableRow className={`${isArchived ? 'opacity-60' : ''} ${isFlagged ? 'bg-orange-50' : ''}`}>
       <TableCell>
-        {getMessageTypeBadge(response.messageType)}
+        <div className="flex items-center gap-2">
+          {getMessageTypeBadge(response.messageType)}
+          {isFlagged && (
+            <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
+              Marcado
+            </span>
+          )}
+          {isArchived && (
+            <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+              Arquivado
+            </span>
+          )}
+        </div>
       </TableCell>
       <TableCell>
         <div className="space-y-1">
@@ -75,7 +91,7 @@ const ClientResponseRow = ({ response }: ClientResponseRowProps) => {
         </div>
       </TableCell>
       <TableCell>
-        <ClientResponseActions response={response} />
+        <ClientResponseActions response={response} onUpdate={onUpdate} />
       </TableCell>
     </TableRow>
   );

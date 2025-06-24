@@ -6,24 +6,29 @@ import ClientResponseRow from "./ClientResponseRow";
 
 interface ClientResponsesTableProps {
   responses: ClientResponse[];
+  onUpdate?: () => void;
 }
 
-const ClientResponsesTable = ({ responses }: ClientResponsesTableProps) => {
+const ClientResponsesTable = ({ responses, onUpdate }: ClientResponsesTableProps) => {
   return (
-    <div className="rounded-md border">
+    <div className="border rounded-lg">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-32">Tipo</TableHead>
-            <TableHead className="w-40">Cliente</TableHead>
+            <TableHead className="w-[150px]">Tipo</TableHead>
+            <TableHead className="w-[200px]">Cliente</TableHead>
             <TableHead>Conteúdo</TableHead>
-            <TableHead className="w-48">Data/Hora</TableHead>
-            <TableHead className="w-24">Ações</TableHead>
+            <TableHead className="w-[180px]">Data/Hora</TableHead>
+            <TableHead className="w-[120px]">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {responses.map((response) => (
-            <ClientResponseRow key={response.id} response={response} />
+            <ClientResponseRow 
+              key={response.id} 
+              response={response} 
+              onUpdate={onUpdate}
+            />
           ))}
         </TableBody>
       </Table>
