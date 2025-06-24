@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -564,7 +563,7 @@ const Settings = () => {
             <li>
               Acesse o <a href="https://developers.facebook.com" className="text-primary underline" target="_blank" rel="noopener noreferrer">Meta for Developers</a>
             </li>
-            <li>Vá para sua aplicação WhatsApp Business e acesse <strong>WhatsApp > Configuration</strong></li>
+            <li>Vá para sua aplicação WhatsApp Business e acesse <strong>WhatsApp &gt; Configuration</strong></li>
             <li>Na seção <strong>Webhooks</strong>, clique em <strong>Configure webhooks</strong></li>
             <li>Cole a <strong>URL do Webhook</strong> da aba Webhook acima</li>
             <li>Cole o <strong>Verify Token</strong> da aba Webhook</li>
