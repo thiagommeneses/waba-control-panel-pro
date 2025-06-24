@@ -17,8 +17,8 @@ export interface Template {
 }
 
 export interface FormValues {
-  phoneNumber: string;
-  templateName: string;
+  phoneNumber?: string;
+  templateName?: string;
   params?: string[];
 }
 

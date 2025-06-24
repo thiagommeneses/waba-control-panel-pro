@@ -3,14 +3,8 @@ import React from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Control } from "react-hook-form";
-import { Template } from "@/types/template";
+import { Template, FormValues } from "@/types/template";
 import { Loader2 } from "lucide-react";
-
-interface FormValues {
-  phoneNumber: string;
-  templateName: string;
-  params?: string[];
-}
 
 interface TemplateSelectorProps {
   control: Control<FormValues>;

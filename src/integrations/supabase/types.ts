@@ -84,6 +84,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sent_messages: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          parameters: Json | null
+          phone_number: string
+          status: string
+          template_name: string
+          updated_at: string
+          wamid: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          parameters?: Json | null
+          phone_number: string
+          status?: string
+          template_name: string
+          updated_at?: string
+          wamid?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          parameters?: Json | null
+          phone_number?: string
+          status?: string
+          template_name?: string
+          updated_at?: string
+          wamid?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

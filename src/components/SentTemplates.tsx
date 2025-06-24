@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Card, 
@@ -71,7 +70,7 @@ const SentTemplates = () => {
         phoneNumber: msg.phone_number || '',
         status: msg.status as SentMessage['status'] || 'SENT',
         timestamp: new Date(msg.created_at),
-        params: msg.parameters ? JSON.parse(msg.parameters) : [],
+        params: msg.parameters ? JSON.parse(msg.parameters as string) : [],
         wamid: msg.wamid,
         errorMessage: msg.error_message
       })) as SentMessage[];
