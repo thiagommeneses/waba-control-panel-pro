@@ -9,7 +9,8 @@ import {
   Phone,
   ClipboardCheck,
   Users,
-  Activity
+  Activity,
+  List
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,11 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       id: "create",
       label: "Criar Template",
       icon: <PenSquare size={20} />,
+    },
+    {
+      id: "templates",
+      label: "Lista de Templates",
+      icon: <List size={20} />,
     },
     {
       id: "history",

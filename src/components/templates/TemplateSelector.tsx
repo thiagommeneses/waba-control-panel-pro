@@ -3,8 +3,14 @@ import React from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Control } from "react-hook-form";
-import { FormValues, Template } from "@/types/template";
+import { Template } from "@/types/template";
 import { Loader2 } from "lucide-react";
+
+interface FormValues {
+  phoneNumber: string;
+  templateName: string;
+  params?: string[];
+}
 
 interface TemplateSelectorProps {
   control: Control<FormValues>;
@@ -19,6 +25,9 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   isLoading,
   onTemplateSelect,
 }) => {
+  // Filtrar templates rejeitados
+  const approvedTemplates = templates.filter(template => template.status !== 'REJECTED');
+
   return (
     <FormField
       control={control}
@@ -45,7 +54,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   <span>Carregando templates...</span>
                 </div>
-              ) : templates.map((template) => (
+              ) : approvedTemplates.map((template) => (
                 <SelectItem 
                   key={template.id} 
                   value={template.name}

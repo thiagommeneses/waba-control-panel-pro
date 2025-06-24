@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import SendTemplate from "@/components/SendTemplate";
 import CreateTemplate from "@/components/CreateTemplate";
+import TemplatesList from "@/components/TemplatesList";
 import SentTemplates from "@/components/SentTemplates";
 import Settings from "@/components/Settings";
 import ApiLogs from "@/components/ApiLogs";
@@ -16,6 +17,8 @@ const Dashboard = () => {
         return <SendTemplate />;
       case "create":
         return <CreateTemplate />;
+      case "templates":
+        return <TemplatesList />;
       case "history":
         return <SentTemplates />;
       case "settings":
