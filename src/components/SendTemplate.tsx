@@ -55,7 +55,7 @@ const SendTemplate = () => {
       }
       
       const response = await fetch(
-        `https://graph.facebook.com/v22.0/${wabaId}/message_templates?access_token=${accessToken}`
+        `https://graph.facebook.com/v23.0/${wabaId}/message_templates?access_token=${accessToken}`
       );
       
       const data = await response.json();

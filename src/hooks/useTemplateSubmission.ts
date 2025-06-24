@@ -24,7 +24,7 @@ export const useTemplateSubmission = () => {
         throw new Error('Credenciais da API não configuradas');
       }
 
-      const response = await fetch(`https://graph.facebook.com/v22.0/${businessId}/message_templates`, {
+      const response = await fetch(`https://graph.facebook.com/v23.0/${businessId}/message_templates`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export const useTemplateSubmission = () => {
 
     try {
       const accessToken = localStorage.getItem('meta_access_token');
-      const response = await fetch(`https://graph.facebook.com/v22.0/${templateId}?access_token=${accessToken}`);
+      const response = await fetch(`https://graph.facebook.com/v23.0/${templateId}?access_token=${accessToken}`);
       const data = await response.json();
 
       if (data.status === 'APPROVED') {
