@@ -1,12 +1,13 @@
 
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Phone, Calendar, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Phone, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ClientResponse } from "@/types/clientResponse";
 import { getMessageTypeBadge } from "@/utils/clientResponseUtils";
+import ClientResponseActions from "./ClientResponseActions";
+import ImageViewer from "./ImageViewer";
 
 interface ClientResponseRowProps {
   response: ClientResponse;
@@ -38,28 +39,11 @@ const ClientResponseRow = ({ response }: ClientResponseRowProps) => {
           {response.messageType === 'text' && response.content && (
             <p className="text-sm">{response.content}</p>
           )}
-          {response.messageType === 'image' && (
-            <div className="space-y-2">
-              {response.imageUrl && (
-                <div className="flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-green-600" />
-                  <a 
-                    href={response.imageUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                  >
-                    Ver imagem
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              )}
-              {response.imageCaption && (
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Legenda:</span> {response.imageCaption}
-                </p>
-              )}
-            </div>
+          {response.messageType === 'image' && response.imageUrl && (
+            <ImageViewer 
+              imageUrl={response.imageUrl} 
+              imageCaption={response.imageCaption}
+            />
           )}
           {(response.messageType === 'button_reply' || response.messageType === 'interactive') && (
             <div className="space-y-1">
@@ -72,7 +56,7 @@ const ClientResponseRow = ({ response }: ClientResponseRowProps) => {
                 <p className="text-sm text-purple-600">
                   <span className="font-medium">Payload:</span> {response.buttonPayload}
                 </p>
-                )}
+              )}
             </div>
           )}
           {response.wamid && (
@@ -91,9 +75,7 @@ const ClientResponseRow = ({ response }: ClientResponseRowProps) => {
         </div>
       </TableCell>
       <TableCell>
-        <Button variant="outline" size="sm" className="h-8">
-          <ExternalLink className="w-3 h-3" />
-        </Button>
+        <ClientResponseActions response={response} />
       </TableCell>
     </TableRow>
   );
