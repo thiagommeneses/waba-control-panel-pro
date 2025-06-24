@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -22,7 +23,8 @@ import {
   Loader2,
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
+  Webhook
 } from "lucide-react";
 import {
   Alert,
@@ -35,6 +37,7 @@ const Settings = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isTokenVisible, setIsTokenVisible] = useState(false);
+  const [isSecretVisible, setIsSecretVisible] = useState(false);
   
   const [settings, setSettings] = useState({
     wabaId: "",
@@ -46,6 +49,8 @@ const Settings = () => {
     webhookUrl: "",
     webhookSecret: ""
   });
+
+  const webhookUrl = "https://rgmvgftedjnhrlbprxkp.supabase.co/functions/v1/whatsapp-webhook";
 
   useEffect(() => {
     // Carregar configurações do banco de dados
@@ -69,7 +74,7 @@ const Settings = () => {
           accessToken: data.access_token,
           apiVersion: data.api_version,
           requestTimeout: data.request_timeout,
-          webhookUrl: data.webhook_url || "",
+          webhookUrl: data.webhook_url || webhookUrl,
           webhookSecret: data.webhook_secret || ""
         });
       }
@@ -186,9 +191,10 @@ const Settings = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="credentials" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="credentials">Credenciais</TabsTrigger>
-              <TabsTrigger value="advanced">Configurações Avançadas</TabsTrigger>
+              <TabsTrigger value="webhook">Webhook</TabsTrigger>
+              <TabsTrigger value="advanced">Avançadas</TabsTrigger>
             </TabsList>
             
             <TabsContent value="credentials">
@@ -349,6 +355,134 @@ const Settings = () => {
                 </div>
               </form>
             </TabsContent>
+
+            <TabsContent value="webhook">
+              <div className="space-y-6">
+                <Alert>
+                  <Webhook className="h-4 w-4" />
+                  <AlertTitle>Configuração do Webhook</AlertTitle>
+                  <AlertDescription>
+                    Configure estas informações no Meta for Developers para receber respostas dos clientes automaticamente.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="webhookUrl">URL do Webhook</Label>
+                    <div className="flex">
+                      <Input
+                        id="webhookUrl"
+                        value={webhookUrl}
+                        readOnly
+                        className="bg-gray-50 rounded-r-none font-mono text-sm"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="rounded-l-none"
+                        onClick={() => handleCopy(webhookUrl)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Use esta URL no campo "Callback URL" do Meta for Developers
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="verifyToken">Verify Token</Label>
+                    <div className="flex">
+                      <Input
+                        id="verifyToken"
+                        value="webhook_verify_token"
+                        readOnly
+                        className="bg-gray-50 rounded-r-none font-mono"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="rounded-l-none"
+                        onClick={() => handleCopy("webhook_verify_token")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Use este token no campo "Verify Token" do Meta for Developers
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="webhookSecret">Webhook Secret</Label>
+                    <div className="flex">
+                      <Input
+                        id="webhookSecret"
+                        type={isSecretVisible ? "text" : "password"}
+                        placeholder="Digite um segredo para validar o webhook"
+                        value={settings.webhookSecret}
+                        onChange={(e) => handleInputChange("webhookSecret", e.target.value)}
+                        className="rounded-r-none"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="rounded-none border-r-0"
+                        onClick={() => setIsSecretVisible(!isSecretVisible)}
+                      >
+                        {isSecretVisible ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="rounded-l-none"
+                        onClick={() => handleCopy(settings.webhookSecret)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Crie um segredo forte para validar as requisições do Meta
+                    </p>
+                  </div>
+                </div>
+
+                <Alert className="bg-blue-50 border-blue-200">
+                  <AlertTriangle className="h-4 w-4 text-blue-600" />
+                  <AlertTitle className="text-blue-800">Eventos para Configurar</AlertTitle>
+                  <AlertDescription className="text-blue-700">
+                    No Meta for Developers, configure estes campos de webhook:
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      <li><strong>messages</strong> - Para receber mensagens dos clientes</li>
+                      <li><strong>message_deliveries</strong> - Para status de entrega</li>
+                      <li><strong>message_reads</strong> - Para confirmações de leitura</li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+
+                <Button onClick={handleSaveSettings} disabled={isLoading} className="w-full">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Salvar Configurações de Webhook
+                    </>
+                  )}
+                </Button>
+              </div>
+            </TabsContent>
             
             <TabsContent value="advanced">
               <div className="space-y-6">
@@ -366,7 +500,8 @@ const Settings = () => {
                     <div className="flex">
                       <Input
                         id="apiVersion"
-                        defaultValue="v22.0"
+                        value={settings.apiVersion}
+                        onChange={(e) => handleInputChange("apiVersion", e.target.value)}
                         className="rounded-r-none"
                       />
                       <Button
@@ -375,6 +510,7 @@ const Settings = () => {
                         size="icon"
                         className="rounded-l-none"
                         onClick={() => {
+                          handleInputChange("apiVersion", "v23.0");
                           toast({
                             description: "Versão da API restaurada para o padrão.",
                           });
@@ -390,39 +526,28 @@ const Settings = () => {
                     <Input
                       id="requestTimeout"
                       type="number"
-                      defaultValue="30000"
-                    />
-                  </div>
-                  
-                  <Separator className="my-4" />
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="webhookUrl">URL de Webhook</Label>
-                    <Input
-                      id="webhookUrl"
-                      placeholder="https://seu-dominio.com/webhook"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Configure esta URL no Meta for Developers para receber atualizações de status
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="webhookSecret">Webhook Secret</Label>
-                    <Input
-                      id="webhookSecret"
-                      type="password"
-                      placeholder="Seu segredo de webhook"
+                      value={settings.requestTimeout}
+                      onChange={(e) => handleInputChange("requestTimeout", e.target.value)}
                     />
                   </div>
                 </div>
                 
                 <Button 
-                  type="button"
+                  onClick={handleSaveSettings}
+                  disabled={isLoading}
                   className="w-full"
                 >
-                  <Save className="mr-2 h-4 w-4" />
-                  Salvar Configurações Avançadas
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Salvar Configurações Avançadas
+                    </>
+                  )}
                 </Button>
               </div>
             </TabsContent>
@@ -432,17 +557,20 @@ const Settings = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>Como obter suas credenciais</CardTitle>
+          <CardTitle>Como configurar o webhook</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <ol className="list-decimal list-inside space-y-2 text-sm">
+          <ol className="list-decimal list-inside space-y-3 text-sm">
             <li>
               Acesse o <a href="https://developers.facebook.com" className="text-primary underline" target="_blank" rel="noopener noreferrer">Meta for Developers</a>
             </li>
-            <li>Navegue até o <strong>Meta Business Suite</strong> e acesse seu WhatsApp Business Account</li>
-            <li>No painel de configurações, localize o <strong>WhatsApp Manager</strong></li>
-            <li>Encontre os IDs necessários na seção de <strong>Informações da Conta</strong></li>
-            <li>Para gerar um Access Token, vá até a seção <strong>System Users</strong> do Meta Business</li>
+            <li>Vá para sua aplicação WhatsApp Business e acesse <strong>WhatsApp > Configuration</strong></li>
+            <li>Na seção <strong>Webhooks</strong>, clique em <strong>Configure webhooks</strong></li>
+            <li>Cole a <strong>URL do Webhook</strong> da aba Webhook acima</li>
+            <li>Cole o <strong>Verify Token</strong> da aba Webhook</li>
+            <li>Configure os campos de webhook: <strong>messages</strong>, <strong>message_deliveries</strong>, <strong>message_reads</strong></li>
+            <li>Salve e verifique que o webhook foi verificado com sucesso</li>
+            <li>Configure e salve o <strong>Webhook Secret</strong> na aba Webhook para maior segurança</li>
           </ol>
           
           <Separator className="my-4" />
@@ -451,7 +579,7 @@ const Settings = () => {
             <div className="flex items-center gap-2">
               <Lock className="h-4 w-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Seu token é armazenado localmente com segurança e usado apenas para autenticar chamadas à API do WhatsApp.
+                O webhook receberá automaticamente todas as respostas dos clientes e as armazenará na base de dados.
               </p>
             </div>
           </div>
