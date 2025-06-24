@@ -1,4 +1,6 @@
 
+import { Json } from "@/integrations/supabase/types";
+
 export interface ClientResponse {
   id: string;
   phoneNumber: string;
@@ -11,5 +13,5 @@ export interface ClientResponse {
   timestampReceived: Date;
   contextWamid?: string;
   clientName?: string;
-  metadata?: Record<string, any>;
+  metadata?: Json;
 }
