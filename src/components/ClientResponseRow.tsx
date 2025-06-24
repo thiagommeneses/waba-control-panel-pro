@@ -15,8 +15,17 @@ interface ClientResponseRowProps {
 }
 
 const ClientResponseRow = ({ response, onUpdate }: ClientResponseRowProps) => {
-  const isFlagged = response.metadata?.flagged === true;
-  const isArchived = response.metadata?.archived === true;
+  // Helper function to safely get metadata as object
+  const getMetadata = () => {
+    if (response.metadata && typeof response.metadata === 'object' && response.metadata !== null && !Array.isArray(response.metadata)) {
+      return response.metadata as Record<string, any>;
+    }
+    return {};
+  };
+
+  const metadata = getMetadata();
+  const isFlagged = metadata.flagged === true;
+  const isArchived = metadata.archived === true;
 
   return (
     <TableRow className={`${isArchived ? 'opacity-60' : ''} ${isFlagged ? 'bg-orange-50' : ''}`}>

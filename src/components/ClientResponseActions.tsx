@@ -43,6 +43,14 @@ const ClientResponseActions = ({ response, onUpdate }: ClientResponseActionsProp
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Helper function to safely get metadata as object
+  const getMetadata = () => {
+    if (response.metadata && typeof response.metadata === 'object' && response.metadata !== null && !Array.isArray(response.metadata)) {
+      return response.metadata as Record<string, any>;
+    }
+    return {};
+  };
+
   const handleReply = () => {
     // Abrir WhatsApp Web com o número do cliente
     const phoneNumber = response.phoneNumber.replace(/\D/g, '');
@@ -58,11 +66,12 @@ const ClientResponseActions = ({ response, onUpdate }: ClientResponseActionsProp
   const handleArchive = async () => {
     setIsLoading(true);
     try {
+      const currentMetadata = getMetadata();
       const { error } = await supabase
         .from('client_responses')
         .update({ 
           metadata: { 
-            ...response.metadata,
+            ...currentMetadata,
             archived: true,
             archived_at: new Date().toISOString()
           }
@@ -123,13 +132,14 @@ const ClientResponseActions = ({ response, onUpdate }: ClientResponseActionsProp
   const handleFlag = async () => {
     setIsLoading(true);
     try {
-      const isCurrentlyFlagged = response.metadata?.flagged === true;
+      const currentMetadata = getMetadata();
+      const isCurrentlyFlagged = currentMetadata.flagged === true;
       
       const { error } = await supabase
         .from('client_responses')
         .update({ 
           metadata: { 
-            ...response.metadata,
+            ...currentMetadata,
             flagged: !isCurrentlyFlagged,
             flagged_at: !isCurrentlyFlagged ? new Date().toISOString() : null
           }
@@ -158,8 +168,9 @@ const ClientResponseActions = ({ response, onUpdate }: ClientResponseActionsProp
     }
   };
 
-  const isFlagged = response.metadata?.flagged === true;
-  const isArchived = response.metadata?.archived === true;
+  const metadata = getMetadata();
+  const isFlagged = metadata.flagged === true;
+  const isArchived = metadata.archived === true;
 
   return (
     <div className="flex gap-2">
