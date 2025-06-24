@@ -141,7 +141,7 @@ const Settings = () => {
       const phoneNumberId = settings.phoneNumberId;
       const accessToken = settings.accessToken;
       
-      const response = await fetch(`https://graph.facebook.com/v22.0/${phoneNumberId}?access_token=${accessToken}`);
+      const response = await fetch(`https://graph.facebook.com/v23.0/${phoneNumberId}?access_token=${accessToken}`);
       const data = await response.json();
       
       if (data.error) {
