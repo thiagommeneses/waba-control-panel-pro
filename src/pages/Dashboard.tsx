@@ -18,9 +18,13 @@ import SentTemplates from "@/components/SentTemplates";
 import ClientResponses from "@/components/ClientResponses";
 import Settings from "@/components/Settings";
 import ApiLogs from "@/components/ApiLogs";
+import UserHeader from "@/components/UserHeader";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("send");
+  const { isAdmin } = useAuth();
 
   const getPageTitle = () => {
     switch (activeTab) {
@@ -56,9 +60,17 @@ const Dashboard = () => {
       case "responses":
         return <ClientResponses />;
       case "settings":
-        return <Settings />;
+        return (
+          <ProtectedRoute adminOnly>
+            <Settings />
+          </ProtectedRoute>
+        );
       case "logs":
-        return <ApiLogs />;
+        return (
+          <ProtectedRoute adminOnly>
+            <ApiLogs />
+          </ProtectedRoute>
+        );
       default:
         return <SendTemplate />;
     }
@@ -69,6 +81,7 @@ const Dashboard = () => {
       <div className="min-h-screen flex w-full">
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <SidebarInset>
+          <UserHeader />
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
