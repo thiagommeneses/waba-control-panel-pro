@@ -406,9 +406,10 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 📞 Contato
 
 Para suporte ou dúvidas:
-- 📧 Email: seu-email@exemplo.com
-- 💬 WhatsApp: +55 (11) 99999-9999
-- 🌐 Website: [seu-website.com](https://seu-website.com)
+- 📧 Email: thiagomm@icloud.com
+- 💬 WhatsApp: +55 (62) 9****-**22
+- 🌐 Website pt_br: [pixmeyou.com](https://pixmeyou.com)
+- 🌐 Website en_us: [us.pixmeyou.com](https://us.pixmeyou.com)
 
 ---
 
