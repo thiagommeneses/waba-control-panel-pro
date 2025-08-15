@@ -54,28 +54,35 @@ const Settings = () => {
   useEffect(() => {
     // Carregar configurações do banco de dados
     const loadSettings = async () => {
-      const { data, error } = await supabase
-        .from('api_settings')
-        .select('*')
-        .limit(1)
-        .single();
+      try {
+        // Usar rpc para obter a configuração mais recente
+        const { data, error } = await supabase
+          .rpc('get_latest_api_settings');
 
-      if (error) {
-        console.error('Erro ao carregar configurações:', error);
-        return;
-      }
+        if (error) {
+          // Se não há configurações ainda, não é erro crítico
+          if (error.message?.includes('no rows returned')) {
+            console.log('Nenhuma configuração encontrada ainda');
+            return;
+          }
+          console.error('Erro ao carregar configurações:', error);
+          return;
+        }
 
-      if (data) {
-        setSettings({
-          wabaId: data.waba_id,
-          businessId: data.business_id,
-          phoneNumberId: data.phone_number_id,
-          accessToken: data.access_token,
-          apiVersion: data.api_version,
-          requestTimeout: data.request_timeout,
-          webhookUrl: data.webhook_url || webhookUrl,
-          webhookSecret: data.webhook_secret || ""
-        });
+        if (data) {
+          setSettings({
+            wabaId: data.waba_id || "",
+            businessId: data.business_id || "",
+            phoneNumberId: data.phone_number_id || "",
+            accessToken: data.access_token || "",
+            apiVersion: data.api_version || "v23.0",
+            requestTimeout: data.request_timeout || 30000,
+            webhookUrl: data.webhook_url || webhookUrl,
+            webhookSecret: data.webhook_secret || ""
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao buscar configurações:', err);
       }
     };
 
@@ -87,22 +94,51 @@ const Settings = () => {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase
+      // Verificar se há configurações existentes primeiro
+      const { data: existing } = await supabase
         .from('api_settings')
-        .upsert({
-          waba_id: settings.wabaId,
-          business_id: settings.businessId,
-          phone_number_id: settings.phoneNumberId,
-          access_token: settings.accessToken,
-          api_version: settings.apiVersion,
-          request_timeout: settings.requestTimeout,
-          webhook_url: settings.webhookUrl,
-          webhook_secret: settings.webhookSecret
-        })
-        .select()
-        .single();
+        .select('id')
+        .limit(1)
+        .maybeSingle();
 
-      if (error) throw error;
+      let result;
+      if (existing) {
+        // Atualizar configuração existente
+        result = await supabase
+          .from('api_settings')
+          .update({
+            waba_id: settings.wabaId,
+            business_id: settings.businessId,
+            phone_number_id: settings.phoneNumberId,
+            access_token: settings.accessToken,
+            api_version: settings.apiVersion,
+            request_timeout: settings.requestTimeout,
+            webhook_url: settings.webhookUrl,
+            webhook_secret: settings.webhookSecret,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+      } else {
+        // Inserir nova configuração
+        result = await supabase
+          .from('api_settings')
+          .insert({
+            waba_id: settings.wabaId,
+            business_id: settings.businessId,
+            phone_number_id: settings.phoneNumberId,
+            access_token: settings.accessToken,
+            api_version: settings.apiVersion,
+            request_timeout: settings.requestTimeout,
+            webhook_url: settings.webhookUrl,
+            webhook_secret: settings.webhookSecret
+          })
+          .select()
+          .single();
+      }
+
+      if (result.error) throw result.error;
       
       // Também salvar no localStorage para compatibilidade com o código existente
       localStorage.setItem('wabaSettings', JSON.stringify(settings));
