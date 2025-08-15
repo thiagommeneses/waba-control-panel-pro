@@ -11,11 +11,9 @@ import {
   Activity,
   List,
   MessageCircle,
-  ChevronRight,
-  Shield
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -37,7 +35,6 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
-  const { isAdmin } = useAuth();
   const templateItems = [
     {
       id: "send",
@@ -162,34 +159,29 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
 
         <SidebarSeparator />
 
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Sistema (Admin)
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {systemItems.map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton 
-                      onClick={() => setActiveTab(item.id)}
-                      isActive={activeTab === item.id}
-                      tooltip={item.description}
-                      className="group relative"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span className="font-medium">{item.label}</span>
-                      {activeTab === item.id && (
-                        <ChevronRight className="ml-auto h-4 w-4 text-primary" />
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        <SidebarGroup>
+          <SidebarGroupLabel>Sistema</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {systemItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton 
+                    onClick={() => setActiveTab(item.id)}
+                    isActive={activeTab === item.id}
+                    tooltip={item.description}
+                    className="group relative"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span className="font-medium">{item.label}</span>
+                    {activeTab === item.id && (
+                      <ChevronRight className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
